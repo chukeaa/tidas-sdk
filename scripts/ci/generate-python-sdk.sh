@@ -13,8 +13,9 @@ PYTHON_SDK_ROOT="${PYTHON_SDK_ROOT:-$REPO_ROOT/sdks/python}"
 OUTPUT_DIR="${OUTPUT_DIR:-$PYTHON_SDK_ROOT/src/tidas_sdk/generated}"
 GENERATOR="${GENERATOR:-$PYTHON_SDK_ROOT/scripts/generate_sdk.py}"
 source "$SCRIPT_DIR/lib/tidas-tools-source.sh"
+TIDAS_TOOLS_ASSET_RESOLVER="$SCRIPT_DIR/tidas-tools-assets.mjs"
 
-SCHEMAS_DIR="${TIDAS_TOOLS_PATH:-}/src/tidas_tools/tidas/schemas"
+SCHEMAS_DIR=""
 PYTHON_RUNNER=()
 
 safe_tput() {
@@ -133,7 +134,10 @@ main() {
     log "Starting Python SDK generation..."
     resolve_tidas_tools_source "$REPO_ROOT"
     TIDAS_TOOLS_PATH="$RESOLVED_TIDAS_TOOLS_PATH"
-    SCHEMAS_DIR="$TIDAS_TOOLS_PATH/src/tidas_tools/tidas/schemas"
+    SCHEMAS_DIR="$(
+        node "$TIDAS_TOOLS_ASSET_RESOLVER" path-for-kind \
+            "$TIDAS_TOOLS_PATH" json-schema
+    )"
     validate_inputs
     check_dependencies
     generate_models

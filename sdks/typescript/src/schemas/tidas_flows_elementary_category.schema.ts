@@ -303,4 +303,54 @@ export const FlowsElementaryCategorySchema: z.ZodType<any> = z.union([
     '@catId': z.literal('4').optional(),
     '#text': z.literal('Other elementary flows').optional(),
   }),
+  z.object({
+    '@level': z.literal('2').optional(),
+    '@catId': z.literal('1.3.6').optional(),
+    '#text': z.literal('Emissions to air, indoor').optional(),
+  }),
+  z.object({
+    '@level': z.literal('2').optional(),
+    '@catId': z.literal('1.3.7').optional(),
+    '#text': z.literal('Emissions to urban air low stack').optional(),
+  }),
+  z.object({
+    '@level': z.literal('2').optional(),
+    '@catId': z.literal('1.3.8').optional(),
+    '#text': z.literal('Emissions to urban air high stack').optional(),
+  }),
+  z.object({
+    '@level': z.literal('2').optional(),
+    '@catId': z.literal('1.3.9').optional(),
+    '#text': z.literal('Emissions to urban air very high stack').optional(),
+  }),
+  z.object({
+    '@level': z.literal('2').optional(),
+    '@catId': z.literal('1.3.10').optional(),
+    '#text': z.literal('Emissions to non-urban air close to ground').optional(),
+  }),
+  z.object({
+    '@level': z.literal('2').optional(),
+    '@catId': z.literal('1.3.11').optional(),
+    '#text': z.literal('Emissions to non-urban air low stack').optional(),
+  }),
+  z.object({
+    '@level': z.literal('2').optional(),
+    '@catId': z.literal('1.3.12').optional(),
+    '#text': z.literal('Emissions to non-urban air high stack').optional(),
+  }),
+  z.object({
+    '@level': z.literal('2').optional(),
+    '@catId': z.literal('1.3.13').optional(),
+    '#text': z.literal('Emissions to non-urban air very high stack').optional(),
+  }),
+  z.object({
+    '@level': z.literal('1').optional(),
+    '@catId': z.literal('1.4').optional(),
+    '#text': z.literal('Emissions to industrial soil').optional(),
+  }),
+  z.object({
+    '@level': z.literal('2').optional(),
+    '@catId': z.literal('1.4.1').optional(),
+    '#text': z.literal('Other emissions to industrial soil').optional(),
+  }),
 ]);

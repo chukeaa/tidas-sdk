@@ -98,7 +98,8 @@ await convertDirectory('./input', './output', { toXml: true });
 await convertDirectory('./eilcd-data', './tidas-output', { toXml: false });
 ```
 
-`convertDirectory()` mirrors the non-export behavior of `tidas-tools convert.py`:
+`convertDirectory()` mirrors the non-export behavior of the unified native
+`tidas convert` command:
 
 - converts `.json -> .xml` or `.xml -> .json`
 - copies non-converted files into `output/data`
@@ -300,5 +301,5 @@ MIT License - see [LICENSE](../LICENSE) file for details.
 
 ## 🔗 Related Packages
 
-- [tidas-tools](https://pypi.org/project/tidas-tools/): Python utilities and upstream schema/methodology source for TIDAS data
+- [tidas-tools](https://github.com/tiangong-lca/tidas-tools): native `tidas` CLI and integrity-locked upstream schema/methodology assets
 - [tidas-python-sdk](../python/): Python SDK (in development)

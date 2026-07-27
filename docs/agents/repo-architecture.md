@@ -25,8 +25,8 @@ checkPaths:
   - scripts/docpact
   - scripts/docpact-gate.sh
   - scripts/install-git-hooks.sh
-lastReviewedAt: 2026-06-25
-lastReviewedCommit: cc1109895a6c7f577e938a7ebe7b49ad19f9d707
+lastReviewedAt: 2026-07-27
+lastReviewedCommit: 79ea567ff53c297e3f5f604e7b5a65411456d2e5
 related:
   - ../../AGENTS.md
   - ../../.docpact/config.yaml
@@ -67,7 +67,8 @@ The practical executable chain today is:
 
 Important consequences:
 
-- TypeScript runtime assets mirror the non-export upstream assets under `tidas-tools/src/tidas_tools/{tidas,eilcd}`
+- `scripts/ci/tidas-tools-assets.mjs` validates the upstream Rust asset lock and derives schema, methodology, and runtime roots from catalog entries rather than package-layout assumptions
+- TypeScript runtime assets mirror the catalog-selected non-export roots and include the exact authoritative `asset-lock.v1.json`
 - Python generated models also refresh from `tidas-tools`
 - `tidas` remains important for public spec/docs content, but it is not the immediate generation source for current package refreshes
 
@@ -81,12 +82,15 @@ It also owns the stable validation contract that downstream apps consume:
 
 - generated schemas can emit custom Zod issues for localized-text checks
 - `sdks/typescript/scripts/generate-zod-schemas.ts` is responsible for preserving the custom validation-code injection during regeneration
+- that generator also preserves the cross-field Flow name condition that JSON-Schema `if` / `then` cannot be represented by the intermediate TypeScript interface alone
 - `sdks/typescript/src/core/config/ValidationConfig.ts` normalizes raw Zod issues into the `validationIssues` payload returned by `validateEnhanced()`
 - downstream consumers should rely on normalized issue codes instead of parsing free-form error text when they need stable programmatic behavior
 
 ### Python package
 
 The Python package owns generated SDK surfaces and validation helpers that are published separately from standalone `tidas-tools`.
+Its generator consumes an explicitly resolved schema directory and preserves the
+same type-aware Flow name condition in generated Pydantic models.
 
 ## Release Automation
 

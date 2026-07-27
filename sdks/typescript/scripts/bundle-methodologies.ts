@@ -9,8 +9,8 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import yaml from 'yaml';
 import {
-  requireTidasToolsDir,
-  resolveTidasToolsDir,
+  requireTidasToolsMethodologyDir,
+  resolveTidasToolsMethodologyDir,
 } from './resolve-tidas-tools-path.js';
 
 const OUTPUT_DIR = path.join(__dirname, '../src/data');
@@ -73,19 +73,16 @@ async function readMethodologyFile(filePath: string) {
 async function main() {
   console.log('🚀 Starting methodology bundling process...');
 
-  const tidasToolsDir = resolveTidasToolsDir();
-  if (!tidasToolsDir && existsSync(OUTPUT_FILE)) {
+  const methodologyRoot = resolveTidasToolsMethodologyDir();
+  if (!methodologyRoot && existsSync(OUTPUT_FILE)) {
     console.warn(
       '⚠️  No tidas-tools source checkout found. Keeping the existing bundled methodologies artifact.'
     );
     return;
   }
 
-  const methodologyDir = path.join(
-    requireTidasToolsDir(
-      'Methodology bundling requires access to the upstream tidas-tools repository. Set TIDAS_TOOLS_PATH, place a sibling ../tidas-tools checkout next to this repo, or run ../../scripts/ci/generate-typescript-sdk.sh.'
-    ),
-    'methodologies'
+  const methodologyDir = requireTidasToolsMethodologyDir(
+    'Methodology bundling requires access to the upstream Rust asset lock. Set TIDAS_TOOLS_PATH, place a sibling ../tidas-tools checkout next to this repo, or run ../../scripts/ci/generate-typescript-sdk.sh.'
   );
   const methodologyFilesMapping = createMethodologyFilesMapping(methodologyDir);
 

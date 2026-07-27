@@ -219,4 +219,50 @@ export type FlowsElementaryCategory =
   | { '@level'?: '0'; '@catId'?: '3'; '#text'?: 'Land use' }
   | { '@level'?: '1'; '@catId'?: '3.1'; '#text'?: 'Land occupation' }
   | { '@level'?: '1'; '@catId'?: '3.2'; '#text'?: 'Land transformation' }
-  | { '@level'?: '0'; '@catId'?: '4'; '#text'?: 'Other elementary flows' };
+  | { '@level'?: '0'; '@catId'?: '4'; '#text'?: 'Other elementary flows' }
+  | { '@level'?: '2'; '@catId'?: '1.3.6'; '#text'?: 'Emissions to air, indoor' }
+  | {
+      '@level'?: '2';
+      '@catId'?: '1.3.7';
+      '#text'?: 'Emissions to urban air low stack';
+    }
+  | {
+      '@level'?: '2';
+      '@catId'?: '1.3.8';
+      '#text'?: 'Emissions to urban air high stack';
+    }
+  | {
+      '@level'?: '2';
+      '@catId'?: '1.3.9';
+      '#text'?: 'Emissions to urban air very high stack';
+    }
+  | {
+      '@level'?: '2';
+      '@catId'?: '1.3.10';
+      '#text'?: 'Emissions to non-urban air close to ground';
+    }
+  | {
+      '@level'?: '2';
+      '@catId'?: '1.3.11';
+      '#text'?: 'Emissions to non-urban air low stack';
+    }
+  | {
+      '@level'?: '2';
+      '@catId'?: '1.3.12';
+      '#text'?: 'Emissions to non-urban air high stack';
+    }
+  | {
+      '@level'?: '2';
+      '@catId'?: '1.3.13';
+      '#text'?: 'Emissions to non-urban air very high stack';
+    }
+  | {
+      '@level'?: '1';
+      '@catId'?: '1.4';
+      '#text'?: 'Emissions to industrial soil';
+    }
+  | {
+      '@level'?: '2';
+      '@catId'?: '1.4.1';
+      '#text'?: 'Other emissions to industrial soil';
+    };

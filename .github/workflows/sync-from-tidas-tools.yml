@@ -7,8 +7,8 @@ on:
   workflow_dispatch:
     inputs:
       tidas_tools_sha:
-        description: Exact tiangong-lca/tidas-tools commit SHA to sync from. Leave empty to use main.
-        required: false
+        description: Exact 40-character tiangong-lca/tidas-tools commit SHA to sync from.
+        required: true
         type: string
       packages:
         description: Package families to regenerate.
@@ -78,13 +78,13 @@ jobs:
           python3 - <<'PY'
           import json
           import os
+          import re
           from pathlib import Path
 
           event_name = os.environ["EVENT_NAME"]
           outputs_path = Path(os.environ["GITHUB_OUTPUT"])
 
           requested_sha = ""
-          requested_ref = "main"
           requested_packages = {"typescript", "python"}
           ts_bump = "patch"
           py_bump = "patch"
@@ -94,7 +94,6 @@ jobs:
               with Path(os.environ["EVENT_PATH"]).open("r", encoding="utf-8") as fh:
                   payload = json.load(fh).get("client_payload", {})
               requested_sha = str(payload.get("tidas_tools_sha", "") or "")
-              requested_ref = str(payload.get("tidas_tools_ref", "main") or "main")
               packages = payload.get("packages", ["typescript", "python"])
               if isinstance(packages, str):
                   packages = [packages]
@@ -104,7 +103,6 @@ jobs:
               reason = str(payload.get("reason", "") or "")
           else:
               requested_sha = os.environ.get("INPUT_TIDAS_TOOLS_SHA", "")
-              requested_ref = requested_sha or "main"
               packages = os.environ.get("INPUT_PACKAGES", "both")
               if packages == "typescript":
                   requested_packages = {"typescript"}
@@ -118,10 +116,13 @@ jobs:
 
           requested_typescript = "typescript" in requested_packages
           requested_python = "python" in requested_packages
+          if not re.fullmatch(r"[0-9a-fA-F]{40}", requested_sha):
+              raise SystemExit(
+                  "error: tidas_tools_sha must be an exact 40-character commit SHA"
+              )
 
           with outputs_path.open("a", encoding="utf-8") as fh:
               fh.write(f"requested_sha={requested_sha}\n")
-              fh.write(f"requested_ref={requested_ref}\n")
               fh.write(f"requested_typescript={'true' if requested_typescript else 'false'}\n")
               fh.write(f"requested_python={'true' if requested_python else 'false'}\n")
               fh.write(f"typescript_bump={ts_bump}\n")
@@ -135,7 +136,6 @@ jobs:
         id: upstream
         env:
           REQUESTED_SHA: ${{ steps.request.outputs.requested_sha }}
-          REQUESTED_REF: ${{ steps.request.outputs.requested_ref }}
         run: |
           set -euo pipefail
 
@@ -145,13 +145,13 @@ jobs:
           rm -rf "$UPSTREAM_DIR"
           git clone --quiet "$CLONE_URL" "$UPSTREAM_DIR"
 
-          if [ -n "$REQUESTED_SHA" ]; then
-            git -C "$UPSTREAM_DIR" checkout --detach "$REQUESTED_SHA"
-          else
-            git -C "$UPSTREAM_DIR" checkout --detach "$REQUESTED_REF"
-          fi
+          git -C "$UPSTREAM_DIR" checkout --detach "$REQUESTED_SHA"
 
           RESOLVED_SHA="$(git -C "$UPSTREAM_DIR" rev-parse HEAD)"
+          if [ "${RESOLVED_SHA,,}" != "${REQUESTED_SHA,,}" ]; then
+            echo "error: resolved upstream commit does not match the request" >&2
+            exit 1
+          fi
           SHORT_SHA="${RESOLVED_SHA:0:7}"
 
           {
@@ -190,6 +190,7 @@ jobs:
         env:
           TIDAS_TOOLS_SOURCE_MODE: auto
           TIDAS_TOOLS_PATH: ${{ steps.upstream.outputs.path }}
+          TIDAS_TOOLS_SHA: ${{ steps.upstream.outputs.resolved_sha }}
         run: ./scripts/ci/generate-typescript-sdk.sh
 
       - name: Regenerate Python SDK
@@ -197,6 +198,7 @@ jobs:
         env:
           TIDAS_TOOLS_SOURCE_MODE: auto
           TIDAS_TOOLS_PATH: ${{ steps.upstream.outputs.path }}
+          TIDAS_TOOLS_SHA: ${{ steps.upstream.outputs.resolved_sha }}
         run: ./scripts/ci/generate-python-sdk.sh
 
       - name: Detect changed packages
@@ -278,6 +280,7 @@ jobs:
         env:
           TIDAS_TOOLS_SOURCE_MODE: auto
           TIDAS_TOOLS_PATH: ${{ steps.upstream.outputs.path }}
+          TIDAS_TOOLS_SHA: ${{ steps.upstream.outputs.resolved_sha }}
         run: ./scripts/ci/verify-typescript-package.sh
 
       - name: Verify Python package
@@ -285,6 +288,7 @@ jobs:
         env:
           TIDAS_TOOLS_SOURCE_MODE: auto
           TIDAS_TOOLS_PATH: ${{ steps.upstream.outputs.path }}
+          TIDAS_TOOLS_SHA: ${{ steps.upstream.outputs.resolved_sha }}
         run: ./scripts/ci/verify-python-package.sh
 
       - name: Collect release metadata

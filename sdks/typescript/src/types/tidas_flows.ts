@@ -34,8 +34,8 @@ export interface Flows {
         'common:UUID': UUID;
         name: {
           baseName: StringMultiLang;
-          treatmentStandardsRoutes: StringMultiLang;
-          mixAndLocationTypes: StringMultiLang;
+          treatmentStandardsRoutes?: StringMultiLang;
+          mixAndLocationTypes?: StringMultiLang;
           flowProperties?: StringMultiLang;
           'common:other'?: CommonOther;
         };

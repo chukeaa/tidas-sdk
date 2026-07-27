@@ -13,7 +13,6 @@ from __future__ import annotations
 import argparse
 import json
 import keyword
-import os
 import re
 import shutil
 import sys
@@ -39,21 +38,12 @@ GENERIC_MULTILANG_REF_NAMES = {
     "FTMultiLang",
 }
 CHINESE_CHARACTER_PATTERN = r"[\u3400-\u4DBF\u4E00-\u9FFF\uF900-\uFAFF]"
-
-
-def resolve_default_schemas_dir() -> Path:
-    env_root = Path(value) if (value := os.environ.get("TIDAS_TOOLS_PATH")) else None
-    candidates = [
-        env_root / "src/tidas_tools/tidas/schemas" if env_root else None,
-        PROJECT_ROOT / "tidas-tools/src/tidas_tools/tidas/schemas",
-        PROJECT_ROOT.parent / "tidas-tools/src/tidas_tools/tidas/schemas",
-    ]
-
-    for candidate in candidates:
-        if candidate and candidate.is_dir():
-            return candidate
-
-    return PROJECT_ROOT.parent / "tidas-tools/src/tidas_tools/tidas/schemas"
+FLOW_NAME_CONDITIONAL_FIELDS = {
+    "treatmentStandardsRoutes",
+    "mixAndLocationTypes",
+}
+FLOW_NAME_MODEL_NAME = "FlowInformationDataSetInformationName"
+FLOW_DATA_SET_MODEL_NAME = "FlowsFlowDataSet"
 
 
 @dataclass
@@ -159,6 +149,9 @@ class SchemaGenerator:
         needs_localized_text_validators = any(
             model.name in LOCALIZED_TEXT_MODEL_NAMES for model in artifact.models
         )
+        needs_flow_name_condition_validator = any(
+            model.name == FLOW_DATA_SET_MODEL_NAME for model in artifact.models
+        )
         lines = [
             '"""',
             "Auto generated file. DO NOT EDIT.",
@@ -178,7 +171,7 @@ class SchemaGenerator:
             lines.append("")
 
         pydantic_imports = ["Field"]
-        if needs_localized_text_validators:
+        if needs_localized_text_validators or needs_flow_name_condition_validator:
             pydantic_imports.append("model_validator")
         lines.append(f"from pydantic import {', '.join(pydantic_imports)}")
         lines.append("from tidas_sdk.core.base import TidasBaseModel")
@@ -264,6 +257,12 @@ class SchemaGenerator:
         if validator_lines:
             lines.append("")
             lines.extend(validator_lines)
+        flow_name_validator_lines = cls._render_flow_name_condition_validator(
+            model.name
+        )
+        if flow_name_validator_lines:
+            lines.append("")
+            lines.extend(flow_name_validator_lines)
 
         return lines
 
@@ -279,6 +278,33 @@ class SchemaGenerator:
             "            raise ValueError(\"@xml:lang value 'zh' must include at least one Chinese character\")",
             "        if self.xml_lang == 'en' and CHINESE_CHARACTER_PATTERN.search(self.text):",
             "            raise ValueError(\"@xml:lang value 'en' must not contain Chinese characters\")",
+            "        return self",
+        ]
+
+    @staticmethod
+    def _render_flow_name_condition_validator(model_name: str) -> list[str]:
+        if model_name != FLOW_DATA_SET_MODEL_NAME:
+            return []
+
+        return [
+            "    @model_validator(mode='after')",
+            f"    def _validate_type_aware_flow_name(self) -> '{model_name}':",
+            "        if self.modelling_and_validation.lci_method.type_of_data_set == 'Elementary flow':",
+            "            return self",
+            "        name = self.flow_information.data_set_information.name",
+            "        missing = [",
+            "            alias",
+            "            for alias, value in (",
+            "                ('treatmentStandardsRoutes', name.treatment_standards_routes),",
+            "                ('mixAndLocationTypes', name.mix_and_location_types),",
+            "            )",
+            "            if value is None",
+            "        ]",
+            "        if missing:",
+            "            raise ValueError(",
+            "                'Flow name requires ' + ', '.join(missing)",
+            "                + ' for Product, Waste, and Other flows'",
+            "            )",
             "        return self",
         ]
 
@@ -471,12 +497,20 @@ class SchemaConverter:
         if not current_parent_path:
             current_parent_path = self.model_paths.get(parent_class, tuple())
 
+        is_conditionally_required_flow_name = (
+            self.module_name == "tidas_flows"
+            and parent_class == FLOW_NAME_MODEL_NAME
+            and prop_name in FLOW_NAME_CONDITIONAL_FIELDS
+        )
         if self._is_multilang_container(prop_schema):
             self.needs_multilang = True
             type_hint = "MultiLangList"
             if is_required:
                 default_factory = None
                 default_value = "..."
+            elif is_conditionally_required_flow_name:
+                default_factory = None
+                default_value = "None"
             else:
                 default_factory = "MultiLangList"
                 default_value = None
@@ -1370,7 +1404,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--schemas",
         type=Path,
-        default=resolve_default_schemas_dir(),
+        required=True,
         help="Directory containing *.json schema files.",
     )
     parser.add_argument(

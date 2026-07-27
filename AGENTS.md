@@ -30,8 +30,8 @@ checkPaths:
   - scripts/docpact
   - scripts/docpact-gate.sh
   - scripts/install-git-hooks.sh
-lastReviewedAt: 2026-06-25
-lastReviewedCommit: cc1109895a6c7f577e938a7ebe7b49ad19f9d707
+lastReviewedAt: 2026-07-27
+lastReviewedCommit: 79ea567ff53c297e3f5f604e7b5a65411456d2e5
 related:
   - .docpact/config.yaml
   - docs/agents/repo-validation.md
@@ -96,6 +96,7 @@ Keep these entry-level facts in `AGENTS.md`. Use `README.md`, `docs/agents/repo-
 - upstream refresh helpers:
   - `./scripts/ci/generate-typescript-sdk.sh`
   - `./scripts/ci/generate-python-sdk.sh`
+- the default upstream generation pin is the exact `tidas-tools` commit declared by `TIDAS_TOOLS_SHA`; moving branch tips are not valid generation inputs
 - release tags:
   - `typescript-v<version>`
   - `python-v<version>`
@@ -137,8 +138,9 @@ Route those tasks to:
 ## Operational Invariants
 
 - do not treat `tidas` as the immediate code-generation upstream when package refresh behavior actually depends on `tidas-tools`
-- TypeScript runtime assets mirror non-export upstream assets from `tidas-tools/src/tidas_tools/{tidas,eilcd}`
+- TypeScript runtime assets are selected and integrity-checked through the upstream Rust `assets/asset-lock.v1.json`; the committed package copy includes that authoritative lock
 - generated localized-text checks in the TypeScript schemas must keep emitting stable custom validation codes so downstream UIs can map them without parsing prose
+- generated Flow validators must preserve the upstream type-aware name condition: Elementary flows may omit synthetic qualifiers, while Product, Waste, and Other flows require both qualifier fields
 - Python generated models refresh from `tidas-tools`, not from the public docs repository
 - generated build output under `sdks/typescript/dist/**`, `sdks/python/dist/**`, and `sdks/python/htmlcov/**` is useful for packaging checks but is not the first durable edit surface
 - merged repo PRs here are repo-complete, not workspace-delivery complete
