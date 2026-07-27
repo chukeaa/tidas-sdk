@@ -5,7 +5,7 @@
   "base_taxonomy": {
     "taxonomy_id": "ilcd-flow-categorization",
     "taxonomy_version": "1.1",
-    "source": "src/tidas_tools/eilcd/stylesheets/ILCDFlowCategorization_Reference.xml",
+    "source": "assets/eilcd/stylesheets/ILCDFlowCategorization_Reference.xml",
     "node_count": 55,
     "sha256": "d0b2fabaab5644a25846b04b096b5aad136f88f04398d172057cdf6c2aac156e"
   },

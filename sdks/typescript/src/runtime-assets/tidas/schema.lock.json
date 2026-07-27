@@ -4,9 +4,9 @@
   ],
   "generation": {
     "mode": "deterministic-v1",
-    "tool": "scripts/schema_lock.py"
+    "tool": "tidas-asset-lock"
   },
-  "schemaRoot": "src/tidas_tools/tidas",
+  "schemaRoot": "assets/tidas",
   "schemaSets": {
     "en": {
       "contentAggregateSha256": "1ea0aa48360147be0fb73cfd64edaab25454fe5f3021d1473681bb1a2d7ab5a0",
