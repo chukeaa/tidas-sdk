@@ -31,8 +31,8 @@ checkPaths:
   - scripts/docpact-gate.sh
   - scripts/install-git-hooks.sh
 lastReviewedAt: 2026-07-27
-lastReviewedCommit: a3ea01e7f15f6c1caa2fd134d306094455f6b775
-lastReviewedNote: "Reviewed for issue #89: TypeScript generation and verification now share one lockfile-strict npm dependency installation contract."
+lastReviewedCommit: 228923af473cc36bf6721f447857c84fb22215e3
+lastReviewedNote: "Reviewed for issue #92: generated SDK refreshes now carry governed-doc review evidence, and untagged merged versions remain release-recoverable."
 related:
   - .docpact/config.yaml
   - docs/agents/repo-validation.md

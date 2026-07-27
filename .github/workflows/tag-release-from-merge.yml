@@ -44,6 +44,9 @@ jobs:
           fi
           scripts/docpact-gate.sh --base "$BASE_REF" --head "$HEAD_REF"
 
+      - name: Run automation contract regressions
+        run: python3 ./scripts/ci/test-automation-contracts.py
+
       - name: Detect release version changes
         id: release
         env:

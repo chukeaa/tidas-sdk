@@ -64,6 +64,24 @@ def parse_python_version(raw: str) -> str:
     return match.group("version")
 
 
+def tag_exists(repo_root: Path, tag_name: str) -> bool:
+    result = subprocess.run(
+        [
+            "git",
+            "-C",
+            str(repo_root),
+            "rev-parse",
+            "--verify",
+            "--quiet",
+            f"refs/tags/{tag_name}",
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    return result.returncode == 0
+
+
 def build_outputs(
     repo_root: Path,
     base_ref: str,
@@ -83,12 +101,19 @@ def build_outputs(
 
         base_version = parser(base_raw) if base_raw is not None else ""
         head_version = parser(head_raw) if head_raw is not None else ""
-        changed = bool(base_version and head_version and base_version != head_version)
+        tag_name = f"{tag_prefix}{head_version}" if head_version else ""
+        version_changed = bool(
+            base_version and head_version and base_version != head_version
+        )
+        pending_untagged_version = bool(
+            head_version and not tag_exists(repo_root, tag_name)
+        )
+        changed = version_changed or pending_untagged_version
 
         outputs[f"{name}_previous_version"] = base_version
         outputs[f"{name}_version"] = head_version
         outputs[f"{name}_changed"] = "true" if changed else "false"
-        outputs[f"{name}_tag"] = f"{tag_prefix}{head_version}" if changed else ""
+        outputs[f"{name}_tag"] = tag_name if changed else ""
         any_changed = any_changed or changed
 
     outputs["any_changed"] = "true" if any_changed else "false"

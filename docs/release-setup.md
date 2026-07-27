@@ -17,7 +17,8 @@ checkPaths:
   - .github/workflows/tag-release-from-merge.yml
   - .docpact/config.yaml
 lastReviewedAt: 2026-07-27
-lastReviewedCommit: a3ea01e7f15f6c1caa2fd134d306094455f6b775
+lastReviewedCommit: 228923af473cc36bf6721f447857c84fb22215e3
+lastReviewedNote: "Reviewed for issue #92: tag automation can recover a merged package version when its expected release tag is absent."
 related:
   - ../AGENTS.md
   - ../.docpact/config.yaml
@@ -130,5 +131,8 @@ If the PyPI project does not exist yet, register a pending publisher first so th
 ## Operational Notes
 
 - `publish.yml` validates that the Git tag matches the package version before upload.
+- post-merge tag detection treats an absent `typescript-vX.Y.Z` or `python-vX.Y.Z`
+  tag for the current package version as a pending release; an existing matching
+  tag prevents unrelated later pushes from attempting the same release again.
 - npm and PyPI releases are independent; configure both publishers even if only one package is released initially.
 - if a repository or package rename ever happens, update both the workflow and the trusted publisher registration before the next release.

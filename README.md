@@ -20,8 +20,8 @@ checkPaths:
   - sdks/python/**
   - scripts/ci/**
 lastReviewedAt: 2026-07-27
-lastReviewedCommit: a3ea01e7f15f6c1caa2fd134d306094455f6b775
-lastReviewedNote: "Reviewed for issue #89: clean TypeScript upstream refreshes are lockfile-strict."
+lastReviewedCommit: 228923af473cc36bf6721f447857c84fb22215e3
+lastReviewedNote: "Reviewed for issue #92: automated SDK refresh PRs include Docpact review records and release recovery handles merged versions whose tag is still absent."
 ---
 
 # TIDAS SDKs
@@ -90,6 +90,11 @@ cargo install tidas --locked
 - Upstream Automation Design: [docs/upstream-automation.md](./docs/upstream-automation.md)
 - TypeScript Release Guide: [sdks/typescript/RELEASE.md](./sdks/typescript/RELEASE.md)
 - Python Release Guide: [sdks/python/RELEASE.md](./sdks/python/RELEASE.md)
+
+Automated refresh PRs update the governed documentation review metadata together
+with generated package files. Post-merge release detection also treats a current
+package version without its expected repository tag as pending, so a governance
+repair can recover an interrupted release without inventing a replacement version.
 
 ## Development
 

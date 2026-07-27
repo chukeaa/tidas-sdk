@@ -18,8 +18,8 @@ checkPaths:
   - .github/workflows/tag-release-from-merge.yml
   - .docpact/config.yaml
 lastReviewedAt: 2026-07-27
-lastReviewedCommit: a3ea01e7f15f6c1caa2fd134d306094455f6b775
-lastReviewedNote: "Reviewed for issue #89: clean upstream refreshes use the same lockfile-strict TypeScript dependency graph as verification."
+lastReviewedCommit: 228923af473cc36bf6721f447857c84fb22215e3
+lastReviewedNote: "Reviewed for issue #92: refresh PRs record governed-doc review metadata and release detection recovers merged versions whose tag is absent."
 related:
   - ../AGENTS.md
   - ../.docpact/config.yaml
@@ -138,8 +138,10 @@ Recommended responsibilities:
    - `./scripts/ci/verify-python-package.sh`
 7. detect whether TypeScript and/or Python outputs changed
 8. bump only the affected package version(s) to the next unpublished version in the target registry
-9. commit changes to a bot branch
-10. open or update a release-prep PR against `main`
+9. update the repository's default exact `TIDAS_TOOLS_SHA` verification pin
+10. record deterministic review metadata in every Docpact-required governed document
+11. commit generated package files, the exact pin, and governed review records to a bot branch
+12. open or update a release-prep PR against `main`
 
 Validation-contract safeguard for TypeScript refreshes:
 
@@ -171,7 +173,8 @@ Current implementation file:
 Recommended responsibilities:
 
 1. inspect the merged commit
-2. detect which package version(s) changed compared with the previous `main` commit
+2. detect which package version(s) changed compared with the previous `main`
+   commit, or whose current version still lacks its expected package tag
 3. fail early if a target package version already exists in npm or PyPI
 4. create release tag(s):
    - `typescript-vX.Y.Z`
@@ -274,4 +277,7 @@ Recommended safeguards:
 - if verification fails, fail before opening a PR
 - if a matching automation PR already exists for the same upstream SHA, update it instead of opening duplicates
 - if release tags already exist, fail fast instead of force-pushing or retagging
+- if a package version merged but its tag gate failed, merge the corrective
+  governance/automation change normally; tag-absence detection will retry that
+  still-unpublished version without requiring a version bump
 - if publishing fails after tag creation, recover through the normal tag-based release process instead of rewriting history

@@ -275,6 +275,29 @@ jobs:
           PYTHON_VERSION: ${{ steps.python_release.outputs.version }}
         run: python3 ./scripts/ci/bump-python-version.py --version "$PYTHON_VERSION"
 
+      - name: Update default exact upstream pin
+        if: steps.changes.outputs.any_changed == 'true'
+        env:
+          UPSTREAM_SHA: ${{ steps.upstream.outputs.resolved_sha }}
+        run: |
+          python3 ./scripts/ci/update-tidas-tools-pin.py \
+            --upstream-sha "$UPSTREAM_SHA"
+
+      - name: Record generated SDK documentation review
+        if: steps.changes.outputs.any_changed == 'true'
+        env:
+          UPSTREAM_SHA: ${{ steps.upstream.outputs.resolved_sha }}
+        run: |
+          REVIEWED_AT="$(git show -s --format=%cs "$GITHUB_SHA")"
+          python3 ./scripts/ci/mark-generated-doc-review.py \
+            --reviewed-at "$REVIEWED_AT" \
+            --reviewed-commit "$GITHUB_SHA" \
+            --upstream-sha "$UPSTREAM_SHA"
+
+      - name: Run automation contract regressions
+        if: steps.changes.outputs.any_changed == 'true'
+        run: python3 ./scripts/ci/test-automation-contracts.py
+
       - name: Verify TypeScript package
         if: steps.changes.outputs.typescript_changed == 'true'
         env:
@@ -366,6 +389,14 @@ jobs:
           add-paths: |
             sdks/typescript
             sdks/python
+            AGENTS.md
+            README.md
+            .docpact/config.yaml
+            docs/agents/repo-validation.md
+            docs/agents/repo-architecture.md
+            docs/release-setup.md
+            docs/upstream-automation.md
+            scripts/ci/lib/tidas-tools-source.sh
           branch: ${{ steps.upstream.outputs.branch_name }}
           base: main
           delete-branch: false
