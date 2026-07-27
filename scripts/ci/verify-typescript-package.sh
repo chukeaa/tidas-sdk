@@ -5,6 +5,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 TS_ROOT="$REPO_ROOT/sdks/typescript"
+source "$SCRIPT_DIR/lib/typescript-dependencies.sh"
 
 snapshot_path_state() {
     local target="$1"
@@ -28,10 +29,7 @@ require_stable_generation_output() {
 }
 
 echo "[typescript] installing dependencies"
-(
-    cd "$TS_ROOT"
-    npm ci --workspaces=false
-)
+install_typescript_dependencies "$TS_ROOT"
 
 before_generated_state="$(snapshot_path_state "sdks/typescript/src")"
 

@@ -18,7 +18,8 @@ checkPaths:
   - .github/workflows/tag-release-from-merge.yml
   - .docpact/config.yaml
 lastReviewedAt: 2026-07-27
-lastReviewedCommit: 79ea567ff53c297e3f5f604e7b5a65411456d2e5
+lastReviewedCommit: a3ea01e7f15f6c1caa2fd134d306094455f6b775
+lastReviewedNote: "Reviewed for issue #89: clean upstream refreshes use the same lockfile-strict TypeScript dependency graph as verification."
 related:
   - ../AGENTS.md
   - ../.docpact/config.yaml
@@ -126,17 +127,19 @@ Recommended responsibilities:
 1. check out `tidas-sdk`
 2. check out `tiangong-lca/tidas-tools` at `client_payload.tidas_tools_sha`
 3. verify that checkout against its Rust `assets/asset-lock.v1.json`
-4. regenerate SDKs with:
+4. install TypeScript generator dependencies from the committed lockfile through
+   `npm ci --workspaces=false`
+5. regenerate SDKs with:
    - `TIDAS_TOOLS_SOURCE_MODE=auto`
    - `TIDAS_TOOLS_PATH=<checked out tools path>`
    - `TIDAS_TOOLS_SHA=<checked out exact commit>`
-5. run local parity checks:
+6. run local parity checks:
    - `./scripts/ci/verify-typescript-package.sh`
    - `./scripts/ci/verify-python-package.sh`
-6. detect whether TypeScript and/or Python outputs changed
-7. bump only the affected package version(s) to the next unpublished version in the target registry
-8. commit changes to a bot branch
-9. open or update a release-prep PR against `main`
+7. detect whether TypeScript and/or Python outputs changed
+8. bump only the affected package version(s) to the next unpublished version in the target registry
+9. commit changes to a bot branch
+10. open or update a release-prep PR against `main`
 
 Validation-contract safeguard for TypeScript refreshes:
 

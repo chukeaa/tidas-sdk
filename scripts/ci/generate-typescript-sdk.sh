@@ -13,6 +13,7 @@ REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 OUTPUT_DIR="${OUTPUT_DIR:-$REPO_ROOT/sdks/typescript/src}"
 SDK_ROOT="${SDK_ROOT:-$REPO_ROOT/sdks/typescript}"
 source "$SCRIPT_DIR/lib/tidas-tools-source.sh"
+source "$SCRIPT_DIR/lib/typescript-dependencies.sh"
 TIDAS_TOOLS_ASSET_RESOLVER="$SCRIPT_DIR/tidas-tools-assets.mjs"
 
 # 颜色输出
@@ -110,9 +111,7 @@ check_dependencies() {
     # 检查是否安装了依赖
     if [ ! -d "$SDK_ROOT/node_modules" ]; then
         log_warn "node_modules not found, installing dependencies..."
-        cd "$SDK_ROOT"
-        npm install
-        cd - > /dev/null
+        install_typescript_dependencies "$SDK_ROOT"
     fi
 
     log_info "✓ All dependencies satisfied"

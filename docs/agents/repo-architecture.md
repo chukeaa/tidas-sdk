@@ -26,7 +26,8 @@ checkPaths:
   - scripts/docpact-gate.sh
   - scripts/install-git-hooks.sh
 lastReviewedAt: 2026-07-27
-lastReviewedCommit: 79ea567ff53c297e3f5f604e7b5a65411456d2e5
+lastReviewedCommit: a3ea01e7f15f6c1caa2fd134d306094455f6b775
+lastReviewedNote: "Reviewed for issue #89: upstream TypeScript generation and verification share the lockfile-strict dependency installer."
 related:
   - ../../AGENTS.md
   - ../../.docpact/config.yaml
@@ -68,6 +69,7 @@ The practical executable chain today is:
 Important consequences:
 
 - `scripts/ci/tidas-tools-assets.mjs` validates the upstream Rust asset lock and derives schema, methodology, and runtime roots from catalog entries rather than package-layout assumptions
+- `scripts/ci/lib/typescript-dependencies.sh` gives clean generation and verification runs the same `npm ci --workspaces=false` dependency graph from the committed TypeScript lockfile
 - TypeScript runtime assets mirror the catalog-selected non-export roots and include the exact authoritative `asset-lock.v1.json`
 - Python generated models also refresh from `tidas-tools`
 - `tidas` remains important for public spec/docs content, but it is not the immediate generation source for current package refreshes
