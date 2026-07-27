@@ -20,7 +20,8 @@ checkPaths:
   - sdks/python/**
   - scripts/ci/**
 lastReviewedAt: 2026-07-27
-lastReviewedCommit: 79ea567ff53c297e3f5f604e7b5a65411456d2e5
+lastReviewedCommit: a3ea01e7f15f6c1caa2fd134d306094455f6b775
+lastReviewedNote: "Reviewed for issue #89: clean TypeScript upstream refreshes are lockfile-strict."
 ---
 
 # TIDAS SDKs
@@ -134,7 +135,9 @@ HEAD to match the exact `TIDAS_TOOLS_SHA` pin:
 The generators validate every asset hash and byte count from
 `assets/asset-lock.v1.json`. The TypeScript refresh derives its runtime roots
 from that catalog and commits a matching `runtime-assets/asset-lock.v1.json`;
-it does not discover assets through the upstream Python package layout.
+it does not discover assets through the upstream Python package layout. When a
+clean refresh needs generator dependencies, it requires the committed
+TypeScript lockfile and installs it with `npm ci --workspaces=false`.
 
 ### Release Workflow
 

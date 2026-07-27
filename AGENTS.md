@@ -31,7 +31,8 @@ checkPaths:
   - scripts/docpact-gate.sh
   - scripts/install-git-hooks.sh
 lastReviewedAt: 2026-07-27
-lastReviewedCommit: 79ea567ff53c297e3f5f604e7b5a65411456d2e5
+lastReviewedCommit: a3ea01e7f15f6c1caa2fd134d306094455f6b775
+lastReviewedNote: "Reviewed for issue #89: TypeScript generation and verification now share one lockfile-strict npm dependency installation contract."
 related:
   - .docpact/config.yaml
   - docs/agents/repo-validation.md
@@ -139,6 +140,7 @@ Route those tasks to:
 
 - do not treat `tidas` as the immediate code-generation upstream when package refresh behavior actually depends on `tidas-tools`
 - TypeScript runtime assets are selected and integrity-checked through the upstream Rust `assets/asset-lock.v1.json`; the committed package copy includes that authoritative lock
+- TypeScript generation and verification must install generator dependencies from `sdks/typescript/package-lock.json` through the shared `npm ci --workspaces=false` helper; upstream refreshes must not fall back to `npm install`
 - generated localized-text checks in the TypeScript schemas must keep emitting stable custom validation codes so downstream UIs can map them without parsing prose
 - generated Flow validators must preserve the upstream type-aware name condition: Elementary flows may omit synthetic qualifiers, while Product, Waste, and Other flows require both qualifier fields
 - Python generated models refresh from `tidas-tools`, not from the public docs repository

@@ -28,7 +28,8 @@ checkPaths:
   - scripts/docpact-gate.sh
   - scripts/install-git-hooks.sh
 lastReviewedAt: 2026-07-27
-lastReviewedCommit: 79ea567ff53c297e3f5f604e7b5a65411456d2e5
+lastReviewedCommit: a3ea01e7f15f6c1caa2fd134d306094455f6b775
+lastReviewedNote: "Reviewed for issue #89: dependency bootstrap regression proof now precedes full TypeScript package verification."
 related:
   - ../../AGENTS.md
   - ../../.docpact/config.yaml
@@ -54,7 +55,7 @@ These scripts are the best repo-wide proof because they mirror CI expectations a
 | --- | --- | --- | --- |
 | TypeScript package source, examples, or package scripts | `./scripts/ci/verify-typescript-package.sh` | run one focused example or narrow package command when the change is isolated | This verify script covers build, tests, generated artifacts, and packability. When the change touches validation behavior, also record one smoke result that proves the normalized `validationIssues` payload still exposes stable `code`, `path`, `severity`, optional `params`, and `rawCode`. |
 | Python package source, scripts, or tests | `./scripts/ci/verify-python-package.sh` | run one focused pytest or generation step when the change is isolated | Record if the Python package still depends on generated artifacts from a specific upstream commit. |
-| shared generation helpers under `scripts/ci/**` | run both verify scripts | run the matching `generate-*.sh` path if the task explicitly changes refresh behavior | Generation changes can affect both packages even if only one output changed. |
+| shared generation helpers under `scripts/ci/**` | run both verify scripts | run the matching focused automation regression script and `generate-*.sh` path if the task explicitly changes refresh behavior | Generation changes can affect both packages even if only one output changed. |
 | release setup, tag, or publish workflows | run both verify scripts | inspect `.github/workflows/**` and record any tag or environment assumptions checked locally | Tag creation and registry publication are separate from local package verification. |
 | repo contract or governed-doc changes only | `scripts/docpact validate-config --root . --strict` and `scripts/docpact lint --root . --staged --mode enforce` | run one focused route check such as `scripts/docpact route --root . --intent repo-docs --format text` or `upstream-refresh` when the change touches release / automation docs | Refresh review evidence even when prose-only governed docs change. |
 
@@ -71,6 +72,9 @@ Facts that matter:
 - `scripts/ci/tidas-tools-assets.mjs` validates the Rust
   `assets/asset-lock.v1.json`, all catalog entry hashes/sizes, and the packaged
   TypeScript runtime copy before generation succeeds
+- clean TypeScript generation and verification both install dependencies through
+  `scripts/ci/lib/typescript-dependencies.sh`, which requires the committed
+  lockfile and runs `npm ci --workspaces=false`
 - if you intentionally validate against a local checkout, record both its path
   and exact commit in the PR note
 

@@ -74,6 +74,8 @@ downloads/
 eggs/
 .eggs/
 lib/
+!scripts/ci/lib/
+!scripts/ci/lib/*.sh
 lib64/
 parts/
 sdist/
