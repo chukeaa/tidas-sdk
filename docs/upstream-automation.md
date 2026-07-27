@@ -17,8 +17,8 @@ checkPaths:
   - .github/workflows/sync-from-tidas-tools.yml
   - .github/workflows/tag-release-from-merge.yml
   - .docpact/config.yaml
-lastReviewedAt: 2026-06-25
-lastReviewedCommit: cc1109895a6c7f577e938a7ebe7b49ad19f9d707
+lastReviewedAt: 2026-07-27
+lastReviewedCommit: 79ea567ff53c297e3f5f604e7b5a65411456d2e5
 related:
   - ../AGENTS.md
   - ../.docpact/config.yaml
@@ -98,7 +98,6 @@ Recommended dispatch payload:
   "event_type": "tidas_tools_changed",
   "client_payload": {
     "tidas_tools_sha": "<merged commit sha>",
-    "tidas_tools_ref": "refs/heads/main",
     "packages": ["typescript", "python"],
     "typescript_bump": "patch",
     "python_bump": "patch",
@@ -108,6 +107,8 @@ Recommended dispatch payload:
 ```
 
 Use `repository_dispatch` instead of `workflow_dispatch` so the sender does not need Actions write permission on the target repository.
+`tidas_tools_sha` is mandatory and must be a full 40-character commit; the sync
+workflow rejects an empty value or branch/ref fallback.
 
 ### 2. `tidas-sdk`: sync and release-prep PR
 
@@ -124,20 +125,23 @@ Recommended responsibilities:
 
 1. check out `tidas-sdk`
 2. check out `tiangong-lca/tidas-tools` at `client_payload.tidas_tools_sha`
-3. regenerate SDKs with:
+3. verify that checkout against its Rust `assets/asset-lock.v1.json`
+4. regenerate SDKs with:
    - `TIDAS_TOOLS_SOURCE_MODE=auto`
    - `TIDAS_TOOLS_PATH=<checked out tools path>`
-4. run local parity checks:
+   - `TIDAS_TOOLS_SHA=<checked out exact commit>`
+5. run local parity checks:
    - `./scripts/ci/verify-typescript-package.sh`
    - `./scripts/ci/verify-python-package.sh`
-5. detect whether TypeScript and/or Python outputs changed
-6. bump only the affected package version(s) to the next unpublished version in the target registry
-7. commit changes to a bot branch
-8. open or update a release-prep PR against `main`
+6. detect whether TypeScript and/or Python outputs changed
+7. bump only the affected package version(s) to the next unpublished version in the target registry
+8. commit changes to a bot branch
+9. open or update a release-prep PR against `main`
 
 Validation-contract safeguard for TypeScript refreshes:
 
 - when regeneration touches localized-text schemas or validation helpers, keep the post-processing that injects `params.validationCode` into custom localized-text issues
+- when Flow schemas contain cross-field `if` / `then` conditions, keep the generated Zod/Pydantic type-aware validator post-processing
 - confirm the committed TypeScript package still normalizes raw Zod issues into stable `validationIssues` codes for downstream consumers
 - call this out in the release-prep PR when the machine-readable validation contract changes
 

@@ -39,8 +39,18 @@ def _payload_with_invalid_cas_number() -> dict[str, object]:
     return payload
 
 
+def _valid_type_aware_name_payload(flow_type: str) -> dict[str, object]:
+    payload = _load_payload()
+    data_set = payload["flowDataSet"]
+    data_set["modellingAndValidation"]["LCIMethod"]["typeOfDataSet"] = flow_type
+    info = data_set["flowInformation"]["dataSetInformation"]
+    info["name"]["baseName"][0]["#text"] = "Production from pyrolysis"
+    info["common:synonyms"][0]["#text"] = "tar; syngas; char"
+    return payload
+
+
 def test_flow_pydantic_validation_rejects_missing_required_name_fields() -> None:
-    entity = create_flow(_load_payload())
+    entity = create_flow(_valid_type_aware_name_payload("Product flow"))
 
     assert entity.validate(mode="pydantic") is False
 
@@ -53,6 +63,26 @@ def test_flow_pydantic_validation_rejects_missing_required_name_fields() -> None
         or "treatment_standards_routes" in rendered
     )
     assert "mixAndLocationTypes" in rendered or "mix_and_location_types" in rendered
+
+
+def test_elementary_flow_pydantic_validation_allows_name_without_qualifiers() -> None:
+    entity = create_flow(_valid_type_aware_name_payload("Elementary flow"))
+
+    assert entity.validate(mode="pydantic") is True
+
+
+@pytest.mark.parametrize("flow_type", ["Product flow", "Waste flow", "Other flow"])
+def test_non_elementary_flow_pydantic_validation_requires_name_qualifiers(
+    flow_type: str,
+) -> None:
+    entity = create_flow(_valid_type_aware_name_payload(flow_type))
+
+    assert entity.validate(mode="pydantic") is False
+    error = entity.last_validation_error()
+    assert error is not None
+    rendered = str(error)
+    assert "treatmentStandardsRoutes" in rendered
+    assert "mixAndLocationTypes" in rendered
 
 
 def test_flow_pydantic_validation_rejects_invalid_localized_text() -> None:

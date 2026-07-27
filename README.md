@@ -19,8 +19,8 @@ checkPaths:
   - sdks/typescript/**
   - sdks/python/**
   - scripts/ci/**
-lastReviewedAt: 2026-05-28
-lastReviewedCommit: e33751221a477b6065cac0b0e6372aae601973a1
+lastReviewedAt: 2026-07-27
+lastReviewedCommit: 79ea567ff53c297e3f5f604e7b5a65411456d2e5
 ---
 
 # TIDAS SDKs
@@ -52,10 +52,10 @@ cd sdks/python && uv sync
 
 ### Upstream Tools
 
-`tidas-tools` remains the executable upstream for generation, runtime assets, and standalone tooling behavior:
+`tidas-tools` remains the native Rust upstream for generation, runtime assets, and standalone tooling behavior. Use its unified `tidas` executable for end-user tooling; SDK refreshes consume an exact repository commit and its Rust asset lock.
 
 ```bash
-pip install tidas-tools
+cargo install tidas --locked
 ```
 
 ## Available Packages
@@ -76,7 +76,7 @@ pip install tidas-tools
 
 ### tidas-tools (External Upstream)
 
-- Status: separate upstream package
+- Status: separate native Rust upstream
 - Role: generation source, upstream schemas/assets, and standalone conversion / export tooling
 - Repository: `tiangong-lca/tidas-tools`
 
@@ -124,13 +124,17 @@ uv run mypy .
 ./scripts/ci/generate-python-sdk.sh
 ```
 
-Both generation scripts resolve `tidas-tools` in this order:
+Both generation scripts resolve `tidas-tools` in this order and require its Git
+HEAD to match the exact `TIDAS_TOOLS_SHA` pin:
 
 1. `TIDAS_TOOLS_PATH`
 2. a sibling checkout at `../tidas-tools`
-3. a temporary clone of `tiangong-lca/tidas-tools`
+3. a temporary clone of `tiangong-lca/tidas-tools` checked out at that SHA
 
-For the TypeScript package, this refresh also syncs the packaged runtime conversion assets copied from `tidas-tools/src/tidas_tools/{tidas,eilcd}`.
+The generators validate every asset hash and byte count from
+`assets/asset-lock.v1.json`. The TypeScript refresh derives its runtime roots
+from that catalog and commits a matching `runtime-assets/asset-lock.v1.json`;
+it does not discover assets through the upstream Python package layout.
 
 ### Release Workflow
 

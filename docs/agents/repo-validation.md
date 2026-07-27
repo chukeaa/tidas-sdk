@@ -27,8 +27,8 @@ checkPaths:
   - scripts/docpact
   - scripts/docpact-gate.sh
   - scripts/install-git-hooks.sh
-lastReviewedAt: 2026-06-25
-lastReviewedCommit: cc1109895a6c7f577e938a7ebe7b49ad19f9d707
+lastReviewedAt: 2026-07-27
+lastReviewedCommit: 79ea567ff53c297e3f5f604e7b5a65411456d2e5
 related:
   - ../../AGENTS.md
   - ../../.docpact/config.yaml
@@ -66,14 +66,23 @@ Facts that matter:
   1. `TIDAS_TOOLS_PATH`
   2. sibling `../tidas-tools`
   3. temporary clone
-- this means local verification may exercise different upstream content depending on the environment
-- if you intentionally validate against a local checkout, record that in the PR note
+- every source must be a Git checkout at the exact `TIDAS_TOOLS_SHA`; the default
+  pin is immutable, and dispatch/manual automation must supply a full 40-character SHA
+- `scripts/ci/tidas-tools-assets.mjs` validates the Rust
+  `assets/asset-lock.v1.json`, all catalog entry hashes/sizes, and the packaged
+  TypeScript runtime copy before generation succeeds
+- if you intentionally validate against a local checkout, record both its path
+  and exact commit in the PR note
 
 ## Validation Contract Notes
 
 - TypeScript callers should prefer `validateEnhanced()` and consume the returned `validationIssues` array instead of parsing raw Zod error prose when stable UI or API behavior matters.
 - Normalized validation issues should preserve `code`, `path`, `severity`, optional `params`, `message`, and `rawCode`.
 - Generated localized-text checks must keep attaching `params.validationCode` so the downstream normalized code resolves to stable values such as `localized_text_zh_must_include_chinese_character` and `localized_text_en_must_not_contain_chinese_character`.
+- Generated TypeScript and Python Flow validators must prove that an Elementary
+  flow accepts `baseName` without synthetic qualifiers and Product, Waste, and
+  Other flows reject missing `treatmentStandardsRoutes` or
+  `mixAndLocationTypes`.
 - If a change touches `sdks/typescript/scripts/generate-zod-schemas.ts`, `sdks/typescript/src/core/config/ValidationConfig.ts`, or committed schema output under `sdks/typescript/src/schemas/**`, mention in the PR note whether the validation contract changed or remained backward compatible.
 
 ## Minimum PR Note Quality

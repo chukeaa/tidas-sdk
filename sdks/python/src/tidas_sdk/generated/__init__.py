@@ -153,6 +153,16 @@ from .tidas_flows_elementary_category import FlowsElementaryCategoryVariant51
 from .tidas_flows_elementary_category import FlowsElementaryCategoryVariant52
 from .tidas_flows_elementary_category import FlowsElementaryCategoryVariant53
 from .tidas_flows_elementary_category import FlowsElementaryCategoryVariant54
+from .tidas_flows_elementary_category import FlowsElementaryCategoryVariant55
+from .tidas_flows_elementary_category import FlowsElementaryCategoryVariant56
+from .tidas_flows_elementary_category import FlowsElementaryCategoryVariant57
+from .tidas_flows_elementary_category import FlowsElementaryCategoryVariant58
+from .tidas_flows_elementary_category import FlowsElementaryCategoryVariant59
+from .tidas_flows_elementary_category import FlowsElementaryCategoryVariant60
+from .tidas_flows_elementary_category import FlowsElementaryCategoryVariant61
+from .tidas_flows_elementary_category import FlowsElementaryCategoryVariant62
+from .tidas_flows_elementary_category import FlowsElementaryCategoryVariant63
+from .tidas_flows_elementary_category import FlowsElementaryCategoryVariant64
 from .tidas_flows_elementary_category import FlowsElementaryCategory
 from .tidas_flows_product_category import FlowsProductCategoryVariant0
 from .tidas_flows_product_category import FlowsProductCategoryVariant1
@@ -5982,6 +5992,16 @@ __all__ = [
     'FlowsElementaryCategoryVariant52',
     'FlowsElementaryCategoryVariant53',
     'FlowsElementaryCategoryVariant54',
+    'FlowsElementaryCategoryVariant55',
+    'FlowsElementaryCategoryVariant56',
+    'FlowsElementaryCategoryVariant57',
+    'FlowsElementaryCategoryVariant58',
+    'FlowsElementaryCategoryVariant59',
+    'FlowsElementaryCategoryVariant60',
+    'FlowsElementaryCategoryVariant61',
+    'FlowsElementaryCategoryVariant62',
+    'FlowsElementaryCategoryVariant63',
+    'FlowsElementaryCategoryVariant64',
     'FlowsElementaryCategory',
     'FlowsProductCategoryVariant0',
     'FlowsProductCategoryVariant1',

@@ -295,6 +295,9 @@ export const RequiredFTMultiLangSchema =
   );
 
   fixedContent = applyRequiredLocalizedTextSchemaOverrides(newContent3);
+  if (schemaFile.endsWith('tidas_flows.schema.ts')) {
+    fixedContent = applyFlowNameConditionOverride(fixedContent);
+  }
   const hasChanges = fixedContent !== content;
 
   if (hasChanges) {
@@ -303,6 +306,64 @@ export const RequiredFTMultiLangSchema =
       `   🔧 Applied constraint fixes to ${path.basename(schemaFile)}`
     );
   }
+}
+
+function applyFlowNameConditionOverride(content: string): string {
+  if (content.includes('FLOW_NAME_CONDITIONAL_FIELDS')) {
+    return content;
+  }
+
+  const finalSchemaEnd = '\n});\n';
+  if (!content.endsWith(finalSchemaEnd)) {
+    throw new Error(
+      'Could not attach the Flow name conditional validator to FlowsSchema'
+    );
+  }
+  const schemaStart = content.indexOf('export const FlowsSchema');
+  if (schemaStart === -1) {
+    throw new Error('Could not find FlowsSchema during Flow post-processing');
+  }
+
+  const condition = `
+const FLOW_NAME_CONDITIONAL_FIELDS = [
+  'treatmentStandardsRoutes',
+  'mixAndLocationTypes',
+] as const;
+
+`;
+  const refinedEnd = `
+}).superRefine((value, ctx) => {
+  const dataSet = value.flowDataSet;
+  if (
+    dataSet.modellingAndValidation.LCIMethod.typeOfDataSet ===
+    'Elementary flow'
+  ) {
+    return;
+  }
+
+  const name = dataSet.flowInformation.dataSetInformation.name;
+  for (const field of FLOW_NAME_CONDITIONAL_FIELDS) {
+    if (name[field] === undefined) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: [
+          'flowDataSet',
+          'flowInformation',
+          'dataSetInformation',
+          'name',
+          field,
+        ],
+        message: 'Required',
+      });
+    }
+  }
+});
+`;
+
+  return `${content.slice(0, schemaStart)}${condition}${content.slice(
+    schemaStart,
+    -finalSchemaEnd.length
+  )}${refinedEnd}`;
 }
 
 function applyLocalizedTextSchemaOverrides(content: string): string {

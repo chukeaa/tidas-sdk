@@ -1,4 +1,5 @@
 import { existsSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
 import path from 'node:path';
 
 function repoRoot() {
@@ -16,7 +17,26 @@ function candidateRoots() {
 }
 
 function isToolsRoot(candidate: string) {
-  return existsSync(path.join(candidate, 'src/tidas_tools/tidas'));
+  return existsSync(path.join(candidate, 'assets/asset-lock.v1.json'));
+}
+
+function runAssetResolver(repoRoot: string, ...args: string[]) {
+  const resolver = path.join(
+    resolveSdkRepoRoot(),
+    'scripts/ci/tidas-tools-assets.mjs'
+  );
+  const [command, ...commandArgs] = args;
+  return execFileSync(
+    process.execPath,
+    [resolver, command, repoRoot, ...commandArgs],
+    {
+      encoding: 'utf8',
+    }
+  ).trim();
+}
+
+function resolveSdkRepoRoot() {
+  return path.resolve(__dirname, '../../..');
 }
 
 export function resolveTidasToolsRepoRoot() {
@@ -42,24 +62,72 @@ export function requireTidasToolsRepoRoot(message?: string) {
   return resolved;
 }
 
-export function resolveTidasToolsPackageDir() {
-  const repoRoot = resolveTidasToolsRepoRoot();
-  return repoRoot ? path.join(repoRoot, 'src/tidas_tools') : null;
-}
-
-export function requireTidasToolsPackageDir(message?: string) {
-  return path.join(requireTidasToolsRepoRoot(message), 'src/tidas_tools');
-}
-
-export function resolveTidasToolsDir() {
-  const packageDir = resolveTidasToolsPackageDir();
-  return packageDir ? path.join(packageDir, 'tidas') : null;
-}
-
-export function requireTidasToolsDir(message?: string) {
-  return path.join(requireTidasToolsPackageDir(message), 'tidas');
+export function resolveTidasToolsSchemaDir() {
+  if (process.env.TIDAS_TOOLS_SCHEMA_DIR) {
+    return process.env.TIDAS_TOOLS_SCHEMA_DIR;
+  }
+  const toolsRoot = resolveTidasToolsRepoRoot();
+  return toolsRoot
+    ? runAssetResolver(toolsRoot, 'path-for-kind', 'json-schema')
+    : null;
 }
 
 export function requireTidasToolsSchemaDir(message?: string) {
-  return path.join(requireTidasToolsDir(message), 'schemas');
+  const resolved = resolveTidasToolsSchemaDir();
+  if (!resolved) {
+    throw new Error(
+      message ??
+        'Could not resolve JSON schemas through the upstream Rust asset lock.'
+    );
+  }
+  return resolved;
+}
+
+export function resolveTidasToolsMethodologyDir() {
+  const toolsRoot = resolveTidasToolsRepoRoot();
+  return toolsRoot
+    ? runAssetResolver(toolsRoot, 'path-for-kind', 'methodology')
+    : null;
+}
+
+export function requireTidasToolsMethodologyDir(message?: string) {
+  const resolved = resolveTidasToolsMethodologyDir();
+  if (!resolved) {
+    throw new Error(
+      message ??
+        'Could not resolve methodologies through the upstream Rust asset lock.'
+    );
+  }
+  return resolved;
+}
+
+export interface TidasToolsRuntimeRoot {
+  name: string;
+  sourceRoot: string;
+  path: string;
+}
+
+export function resolveTidasToolsRuntimeRoots(): TidasToolsRuntimeRoot[] | null {
+  const toolsRoot = resolveTidasToolsRepoRoot();
+  return toolsRoot
+    ? (JSON.parse(
+        runAssetResolver(toolsRoot, 'runtime-roots')
+      ) as TidasToolsRuntimeRoot[])
+    : null;
+}
+
+export function requireTidasToolsRuntimeRoots(message?: string) {
+  const resolved = resolveTidasToolsRuntimeRoots();
+  if (!resolved) {
+    throw new Error(
+      message ??
+        'Could not resolve runtime roots through the upstream Rust asset lock.'
+    );
+  }
+  return resolved;
+}
+
+export function requireTidasToolsAssetLockPath(message?: string) {
+  const toolsRoot = requireTidasToolsRepoRoot(message);
+  return runAssetResolver(toolsRoot, 'lock-path');
 }

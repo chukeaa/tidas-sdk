@@ -18,6 +18,12 @@ import {
 } from './tidas_data_types.schema';
 import { LocationsCategorySchema } from './tidas_locations_category.schema';
 
+
+const FLOW_NAME_CONDITIONAL_FIELDS = [
+  'treatmentStandardsRoutes',
+  'mixAndLocationTypes',
+] as const;
+
 export const FlowsSchema = z.object({
   flowDataSet: z.object({
     '@xmlns': z.literal('http://lca.jrc.it/ILCD/Flow'),
@@ -36,8 +42,8 @@ export const FlowsSchema = z.object({
         'common:UUID': UUIDSchema,
         name: z.object({
           baseName: RequiredStringMultiLangSchema,
-          treatmentStandardsRoutes: RequiredStringMultiLangSchema,
-          mixAndLocationTypes: RequiredStringMultiLangSchema,
+          treatmentStandardsRoutes: StringMultiLangSchema.optional(),
+          mixAndLocationTypes: StringMultiLangSchema.optional(),
           flowProperties: StringMultiLangSchema.optional(),
           'common:other': CommonOtherSchema.optional(),
         }),
@@ -186,4 +192,29 @@ export const FlowsSchema = z.object({
     }),
     'common:other': CommonOtherSchema.optional(),
   }),
+}).superRefine((value, ctx) => {
+  const dataSet = value.flowDataSet;
+  if (
+    dataSet.modellingAndValidation.LCIMethod.typeOfDataSet ===
+    'Elementary flow'
+  ) {
+    return;
+  }
+
+  const name = dataSet.flowInformation.dataSetInformation.name;
+  for (const field of FLOW_NAME_CONDITIONAL_FIELDS) {
+    if (name[field] === undefined) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: [
+          'flowDataSet',
+          'flowInformation',
+          'dataSetInformation',
+          'name',
+          field,
+        ],
+        message: 'Required',
+      });
+    }
+  }
 });

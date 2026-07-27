@@ -284,6 +284,56 @@ class FlowsElementaryCategoryVariant54(TidasBaseModel):
     cat_id: Literal['4'] | None = Field(default=None, alias='@catId')
     text: Literal['Other elementary flows'] | None = Field(default=None, alias='#text')
 
+class FlowsElementaryCategoryVariant55(TidasBaseModel):
+    level: Literal['2'] | None = Field(default=None, alias='@level')
+    cat_id: Literal['1.3.6'] | None = Field(default=None, alias='@catId')
+    text: Literal['Emissions to air, indoor'] | None = Field(default=None, alias='#text')
+
+class FlowsElementaryCategoryVariant56(TidasBaseModel):
+    level: Literal['2'] | None = Field(default=None, alias='@level')
+    cat_id: Literal['1.3.7'] | None = Field(default=None, alias='@catId')
+    text: Literal['Emissions to urban air low stack'] | None = Field(default=None, alias='#text')
+
+class FlowsElementaryCategoryVariant57(TidasBaseModel):
+    level: Literal['2'] | None = Field(default=None, alias='@level')
+    cat_id: Literal['1.3.8'] | None = Field(default=None, alias='@catId')
+    text: Literal['Emissions to urban air high stack'] | None = Field(default=None, alias='#text')
+
+class FlowsElementaryCategoryVariant58(TidasBaseModel):
+    level: Literal['2'] | None = Field(default=None, alias='@level')
+    cat_id: Literal['1.3.9'] | None = Field(default=None, alias='@catId')
+    text: Literal['Emissions to urban air very high stack'] | None = Field(default=None, alias='#text')
+
+class FlowsElementaryCategoryVariant59(TidasBaseModel):
+    level: Literal['2'] | None = Field(default=None, alias='@level')
+    cat_id: Literal['1.3.10'] | None = Field(default=None, alias='@catId')
+    text: Literal['Emissions to non-urban air close to ground'] | None = Field(default=None, alias='#text')
+
+class FlowsElementaryCategoryVariant60(TidasBaseModel):
+    level: Literal['2'] | None = Field(default=None, alias='@level')
+    cat_id: Literal['1.3.11'] | None = Field(default=None, alias='@catId')
+    text: Literal['Emissions to non-urban air low stack'] | None = Field(default=None, alias='#text')
+
+class FlowsElementaryCategoryVariant61(TidasBaseModel):
+    level: Literal['2'] | None = Field(default=None, alias='@level')
+    cat_id: Literal['1.3.12'] | None = Field(default=None, alias='@catId')
+    text: Literal['Emissions to non-urban air high stack'] | None = Field(default=None, alias='#text')
+
+class FlowsElementaryCategoryVariant62(TidasBaseModel):
+    level: Literal['2'] | None = Field(default=None, alias='@level')
+    cat_id: Literal['1.3.13'] | None = Field(default=None, alias='@catId')
+    text: Literal['Emissions to non-urban air very high stack'] | None = Field(default=None, alias='#text')
+
+class FlowsElementaryCategoryVariant63(TidasBaseModel):
+    level: Literal['1'] | None = Field(default=None, alias='@level')
+    cat_id: Literal['1.4'] | None = Field(default=None, alias='@catId')
+    text: Literal['Emissions to industrial soil'] | None = Field(default=None, alias='#text')
+
+class FlowsElementaryCategoryVariant64(TidasBaseModel):
+    level: Literal['2'] | None = Field(default=None, alias='@level')
+    cat_id: Literal['1.4.1'] | None = Field(default=None, alias='@catId')
+    text: Literal['Other emissions to industrial soil'] | None = Field(default=None, alias='#text')
+
 FlowsElementaryCategory = Union[
     FlowsElementaryCategoryVariant0,
     FlowsElementaryCategoryVariant1,
@@ -340,4 +390,14 @@ FlowsElementaryCategory = Union[
     FlowsElementaryCategoryVariant52,
     FlowsElementaryCategoryVariant53,
     FlowsElementaryCategoryVariant54,
+    FlowsElementaryCategoryVariant55,
+    FlowsElementaryCategoryVariant56,
+    FlowsElementaryCategoryVariant57,
+    FlowsElementaryCategoryVariant58,
+    FlowsElementaryCategoryVariant59,
+    FlowsElementaryCategoryVariant60,
+    FlowsElementaryCategoryVariant61,
+    FlowsElementaryCategoryVariant62,
+    FlowsElementaryCategoryVariant63,
+    FlowsElementaryCategoryVariant64,
 ]

@@ -6,7 +6,7 @@ from __future__ import annotations
 
 from typing import Annotated, Any, Literal
 
-from pydantic import Field
+from pydantic import Field, model_validator
 from tidas_sdk.core.base import TidasBaseModel
 from tidas_sdk.core.multilang import MultiLangList
 
@@ -27,8 +27,8 @@ from tidas_sdk.core.cas_number import validate_cas_number_check_digit
 
 class FlowInformationDataSetInformationName(TidasBaseModel):
     base_name: MultiLangList = Field(default=..., alias='baseName')
-    treatment_standards_routes: MultiLangList = Field(default=..., alias='treatmentStandardsRoutes')
-    mix_and_location_types: MultiLangList = Field(default=..., alias='mixAndLocationTypes')
+    treatment_standards_routes: MultiLangList | None = Field(default=None, alias='treatmentStandardsRoutes')
+    mix_and_location_types: MultiLangList | None = Field(default=None, alias='mixAndLocationTypes')
     flow_properties: MultiLangList = Field(default_factory=MultiLangList, alias='flowProperties')
     common_other: CommonOther | None = Field(default=None, alias='common:other')
 
@@ -144,6 +144,26 @@ class FlowsFlowDataSet(TidasBaseModel):
     administrative_information: FlowsFlowDataSetAdministrativeInformation = Field(default=..., alias='administrativeInformation')
     flow_properties: FlowsFlowDataSetFlowProperties = Field(default=..., alias='flowProperties')
     common_other: CommonOther | None = Field(default=None, alias='common:other')
+
+    @model_validator(mode='after')
+    def _validate_type_aware_flow_name(self) -> 'FlowsFlowDataSet':
+        if self.modelling_and_validation.lci_method.type_of_data_set == 'Elementary flow':
+            return self
+        name = self.flow_information.data_set_information.name
+        missing = [
+            alias
+            for alias, value in (
+                ('treatmentStandardsRoutes', name.treatment_standards_routes),
+                ('mixAndLocationTypes', name.mix_and_location_types),
+            )
+            if value is None
+        ]
+        if missing:
+            raise ValueError(
+                'Flow name requires ' + ', '.join(missing)
+                + ' for Product, Waste, and Other flows'
+            )
+        return self
 
 class Flows(TidasBaseModel):
     flow_data_set: FlowsFlowDataSet = Field(default=..., alias='flowDataSet')

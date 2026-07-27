@@ -13,6 +13,7 @@ REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 OUTPUT_DIR="${OUTPUT_DIR:-$REPO_ROOT/sdks/typescript/src}"
 SDK_ROOT="${SDK_ROOT:-$REPO_ROOT/sdks/typescript}"
 source "$SCRIPT_DIR/lib/tidas-tools-source.sh"
+TIDAS_TOOLS_ASSET_RESOLVER="$SCRIPT_DIR/tidas-tools-assets.mjs"
 
 # 颜色输出
 RED='\033[0;31m'
@@ -54,10 +55,13 @@ trap cleanup_tidas_tools_source EXIT
 validate_inputs() {
     log_step "Validating inputs..."
 
-    if [ ! -d "$TIDAS_TOOLS_PATH/src/tidas_tools/tidas/schemas" ]; then
-        log_error "tidas-tools schemas not found: $TIDAS_TOOLS_PATH/src/tidas_tools/tidas/schemas"
+    if ! TIDAS_TOOLS_SCHEMA_DIR="$(
+        node "$TIDAS_TOOLS_ASSET_RESOLVER" path-for-kind "$TIDAS_TOOLS_PATH" json-schema
+    )"; then
+        log_error "Could not resolve schemas from the Rust asset lock"
         exit 1
     fi
+    export TIDAS_TOOLS_SCHEMA_DIR
 
     if [ ! -d "$SDK_ROOT" ]; then
         log_error "SDK root directory not found: $SDK_ROOT"
@@ -70,6 +74,7 @@ validate_inputs() {
     fi
 
     log_info "✓ tidas-tools path: $TIDAS_TOOLS_PATH"
+    log_info "✓ Rust asset lock schema directory: $TIDAS_TOOLS_SCHEMA_DIR"
     log_info "✓ SDK root: $SDK_ROOT"
     log_info "✓ Output directory: $OUTPUT_DIR"
 }
@@ -124,7 +129,7 @@ generate_sdk() {
     # Step 1: Generate TypeScript types from JSON schemas
     if grep -q '"generate-types"' package.json; then
         log_info "Step 1/4: Generating TypeScript types from schemas..."
-        if TIDAS_TOOLS_PATH="$TIDAS_TOOLS_PATH" npm run generate-types; then
+        if TIDAS_TOOLS_PATH="$TIDAS_TOOLS_PATH" TIDAS_TOOLS_SCHEMA_DIR="$TIDAS_TOOLS_SCHEMA_DIR" npm run generate-types; then
             log_info "✓ TypeScript types generated successfully"
         else
             log_error "TypeScript type generation failed"
@@ -138,7 +143,7 @@ generate_sdk() {
     # Step 2: Generate Zod validation schemas
     if grep -q '"generate-schemas"' package.json; then
         log_info "Step 2/4: Generating Zod validation schemas..."
-        if TIDAS_TOOLS_PATH="$TIDAS_TOOLS_PATH" npm run generate-schemas; then
+        if TIDAS_TOOLS_PATH="$TIDAS_TOOLS_PATH" TIDAS_TOOLS_SCHEMA_DIR="$TIDAS_TOOLS_SCHEMA_DIR" npm run generate-schemas; then
             log_info "✓ Zod schemas generated successfully"
         else
             log_error "Zod schema generation failed"
@@ -168,6 +173,8 @@ generate_sdk() {
             cd - > /dev/null
             exit 1
         fi
+        node "$TIDAS_TOOLS_ASSET_RESOLVER" verify-runtime-copy \
+            "$TIDAS_TOOLS_PATH" "$OUTPUT_DIR/runtime-assets"
     fi
 
     cd - > /dev/null
@@ -226,6 +233,7 @@ TypeScript SDK Generation Summary
 ================================================================================
 Timestamp:        $(date -u +"%Y-%m-%dT%H:%M:%SZ")
 Source:           $TIDAS_TOOLS_PATH
+Source commit:    $TIDAS_TOOLS_SHA
 Output:           $OUTPUT_DIR
 TypeScript files: $generated_ts_files files total
   - Types:        $types_count files ($types_dir)

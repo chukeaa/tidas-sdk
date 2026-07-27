@@ -192,21 +192,23 @@ describe('package validation parity', () => {
 
     expect(report.ok).toBe(false);
     expect(report.summary.category_count).toBe(1);
-    expect(report.summary.issue_count).toBe(10);
-    expect(report.summary.error_count).toBe(10);
+    expect(report.summary.issue_count).toBe(8);
+    expect(report.summary.error_count).toBe(8);
     expect(report.categories).toHaveLength(1);
     expect(report.categories[0]?.category).toBe('flows');
-    expect(report.categories[0]?.summary.issue_count).toBe(10);
+    expect(report.categories[0]?.summary.issue_count).toBe(8);
     expect(new Set(report.issues.map((issue) => issue.issue_code))).toEqual(
       new Set(['schema_error'])
     );
     expect(locations).toEqual(
       expect.arrayContaining([
         'flowDataSet',
-        'flowDataSet/flowInformation/dataSetInformation/name',
         'flowDataSet/administrativeInformation/publicationAndOwnership',
         'flowDataSet/flowInformation/dataSetInformation/classificationInformation/common:elementaryFlowCategorization/common:category/0',
       ])
+    );
+    expect(locations).not.toContain(
+      'flowDataSet/flowInformation/dataSetInformation/name'
     );
     expect(locations).not.toContain(
       'flowDataSet/flowInformation/dataSetInformation/common:other'
